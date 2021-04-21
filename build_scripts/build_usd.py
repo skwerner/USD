@@ -905,7 +905,12 @@ PNG_URL = "https://downloads.sourceforge.net/project/libpng/libpng16/older-relea
 
 def InstallPNG(context, force, buildArgs):
     with CurrentWorkingDirectory(DownloadURL(PNG_URL, context, force)):
-        RunCMake(context, force, buildArgs)
+        extraArgs = buildArgs
+        if platform.processor() == "arm":
+            extraArgs.append("-DPNG_HARDWARE_OPTIMIZATIONS=ON")
+            extraArgs.append("-DPNG_ARM_NEON=on")
+            extraArgs.append('-DCMAKE_SYSTEM_PROCESSOR="aarch64"')
+        RunCMake(context, force, extraArgs)
 
 PNG = Dependency("PNG", InstallPNG, "include/png.h")
 
