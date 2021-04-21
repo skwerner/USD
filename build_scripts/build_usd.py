@@ -782,7 +782,7 @@ BOOST = Dependency("boost", InstallBoost, BOOST_VERSION_FILE)
 if Windows():
     TBB_URL = "https://github.com/oneapi-src/oneTBB/releases/download/2017_U6/tbb2017_20170412oss_win.zip"
 else:
-    TBB_URL = "https://github.com/oneapi-src/oneTBB/archive/2017_U6.tar.gz"
+    TBB_URL = "https://github.com/oneapi-src/oneTBB/archive/2020_U2.tar.gz"
 
 def InstallTBB(context, force, buildArgs):
     if Windows():
@@ -812,7 +812,14 @@ def InstallTBB_LinuxOrMacOS(context, force, buildArgs):
         # https://github.com/spack/spack/issues/6000#issuecomment-358817701
         if MacOS():
             PatchFile("build/macos.inc", 
-                    [("shell clang -v ", "shell clang --version ")])
+                    [("shell clang -v ", "shell clang --version "),
+                     ("ifeq ($(shell /usr/sbin/sysctl -n hw.machine),Power Macintosh)",
+                      "ifeq ($(shell /usr/sbin/sysctl -n hw.machine),arm64)"),
+                     ("ifeq ($(shell /usr/sbin/sysctl -n hw.optional.64bitops),1)", "ifeq (1,1)"),
+                     ("     export arch:=ppc64", "     export arch:=arm64")])
+            PatchFile("build/macos.clang.inc",
+                    [("ifeq ($(arch),$(filter $(arch),armv7 armv7s arm64))", "ifeq ($(arch),$(filter $(arch),armv7 armv7s arm64 aarch64))")])
+ 
         # TBB does not support out-of-source builds in a custom location.
         Run('make -j{procs} {buildArgs}'
             .format(procs=context.numJobs, 
@@ -824,7 +831,6 @@ def InstallTBB_LinuxOrMacOS(context, force, buildArgs):
         # location that can be shared by both release and debug USD
         # builds. Plus, the TBB build system builds both versions anyway.
         CopyFiles(context, "build/*_release/libtbb*.*", "lib")
-        CopyFiles(context, "build/*_debug/libtbb*.*", "lib")
         CopyDirectory(context, "include/serial", "include/serial")
         CopyDirectory(context, "include/tbb", "include/tbb")
 
