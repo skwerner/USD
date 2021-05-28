@@ -34,7 +34,7 @@ execute_process(
 )
 if (pySideImportResult EQUAL 0)
     set(pySideImportResult "PySide2")
-    set(pySideUIC pyside2-uic python2-pyside2-uic pyside2-uic-2.7)
+    set(pySideUIC pyside2-uic python2-pyside2-uic pyside2-uic-2.7 uic)
 endif()
 
 # PySide2 not found OR PYSIDE explicitly requested
@@ -53,9 +53,14 @@ endif()
 
 find_program(PYSIDEUICBINARY NAMES ${pySideUIC} HINTS ${PYSIDE_BIN_DIR})
 
+
 if (pySideImportResult)
     if (EXISTS ${PYSIDEUICBINARY})
-        message(STATUS "Found ${pySideImportResult}: with ${PYTHON_EXECUTABLE}, will use ${PYSIDEUICBINARY} for pyside-uic binary")
+        get_filename_component(PYSIDEUICBINARYNAME ${PYSIDEUICBINARY} NAME_WLE)
+        if (${PYSIDEUICBINARYNAME} STREQUAL uic)
+            set(PYSIDEUICARGS -g python)
+        endif()
+        message(STATUS "Found ${pySideImportResult}: with ${PYTHON_EXECUTABLE}, will use for pyside-uic binary")
         set(PYSIDE_AVAILABLE True)
     else()
         message(STATUS "Found ${pySideImportResult} but NOT pyside-uic binary")
