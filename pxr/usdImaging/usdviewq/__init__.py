@@ -24,13 +24,16 @@
 
 from __future__ import print_function
 
+from pxr import Tf
+Tf.PreparePythonModule()
+
 import sys, argparse, os
 
 from .qt import QtWidgets, QtCore
 from .common import Timer
 from .appController import AppController
 
-from pxr import UsdAppUtils, Tf
+from pxr import UsdAppUtils
 
 
 class InvalidUsdviewOption(Exception):
@@ -171,7 +174,7 @@ class Launcher(object):
 
         parser.add_argument('--timing', action='store_true',
                             dest='timing',
-                            help='Echo timing stats to console. NOTE: timings will be unreliable when the --mallocTagStats option is also in use')
+                            help='Echo timing stats to console. NOTE: timings will be unreliable when the --memstats option is also in use')
 
         parser.add_argument('--traceToFile', action='store',
                             type=str,

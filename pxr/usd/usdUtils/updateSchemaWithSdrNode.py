@@ -40,12 +40,13 @@ class SchemaDefiningMiscConstants(ConstantsGroup):
     SINGLE_APPLY_SCHEMA = "singleApply"
     TYPED_SCHEMA = "Typed"
     USD_SOURCE_TYPE = "USD"
+    NodeDefAPI = "NodeDefAPI"
 
 class PropertyDefiningKeys(ConstantsGroup):
     USD_VARIABILITY = "usdVariability"
+    USD_SUPPRESS_PROPERTY = "usdSuppressProperty"
     SDF_VARIABILITY_UNIFORM_STRING = "Uniform"
     CONNECTABILITY = "connectability"
-
 
 def _CreateAttrSpecFromNodeAttribute(primSpec, prop, usdSchemaNode, 
         isInput=True):
@@ -67,6 +68,12 @@ def _CreateAttrSpecFromNodeAttribute(primSpec, prop, usdSchemaNode,
             return
 
     propMetadata = prop.GetMetadata()
+    
+    # Early out if the property should be suppressed from being translated to
+    # propertySpec
+    if (propMetadata.has_key(PropertyDefiningKeys.USD_SUPPRESS_PROPERTY) and
+            propMetadata[PropertyDefiningKeys.USD_SUPPRESS_PROPERTY] == "True"):
+        return
 
     if not Sdf.Path.IsValidNamespacedIdentifier(propName):
         Tf.RaiseRuntimeError("Property name (%s) for schema (%s) is an " \
@@ -141,8 +148,12 @@ def UpdateSchemaWithSdrNode(schemaLayer, sdrNode):
           system. This gets appended to the domain name to register with TfType.
 
     Property Level Metadata:
-        USD_VARIABILITY = A property level metadata, which specified a specific
-        sdrNodeProperty should its usd variability set to Uniform or Varying.
+        - USD_VARIABILITY:  A property level metadata, which specified a 
+          specific sdrNodeProperty should its usd variability set to Uniform or 
+          Varying.
+        - USD_SUPPRESS_PROPERTY: A property level metadata, which determines if the
+          property should be suppressed from translation from args to property
+          spec.
     """
     # Early exit on invalid parameters
     if not schemaLayer:
@@ -254,7 +265,7 @@ def UpdateSchemaWithSdrNode(schemaLayer, sdrNode):
         reg = Sdr.Registry()
         usdSchemaNode = reg.GetNodeByIdentifierAndType(usdSchemaClass, 
                 SchemaDefiningMiscConstants.USD_SOURCE_TYPE)
-    
+
     # Create attrSpecs from input parameters
     for propName in sdrNode.GetInputNames():
         _CreateAttrSpecFromNodeAttribute(primSpec, sdrNode.GetInput(propName), 
@@ -264,5 +275,16 @@ def UpdateSchemaWithSdrNode(schemaLayer, sdrNode):
     for propName in sdrNode.GetOutputNames():
         _CreateAttrSpecFromNodeAttribute(primSpec, sdrNode.GetOutput(propName), 
                 usdSchemaNode, False)
+
+    # Extra attrSpec
+    schemaBasePrimDefinition = \
+        Usd.SchemaRegistry().FindConcretePrimDefinition(schemaBase)
+    if schemaBasePrimDefinition and \
+        SchemaDefiningMiscConstants.NodeDefAPI in \
+        schemaBasePrimDefinition.GetAppliedAPISchemas():
+            infoIdAttrSpec = Sdf.AttributeSpec(primSpec, \
+                    UsdShade.Tokens.infoId, Sdf.ValueTypeNames.Token, \
+                    Sdf.VariabilityUniform)
+            infoIdAttrSpec.default = sdrNode.GetIdentifier()
 
     schemaLayer.Save()

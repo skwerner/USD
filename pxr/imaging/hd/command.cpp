@@ -1,7 +1,5 @@
--- glslfx version 0.1
-
 //
-// Copyright 2017 Pixar
+// Copyright 2021 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
 // with the following modification; you may not use this file except in
@@ -23,27 +21,12 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
+#include "pxr/imaging/hd/command.h"
 
---- This is what an import might look like.
---- #import $TOOLS/hdSt/shaders/lightingIntegrationShader.glslfx
+PXR_NAMESPACE_OPEN_SCOPE
 
-#import $TOOLS/hdSt/shaders/lighting.glslfx
+HdCommandArgDescriptor::HdCommandArgDescriptor() = default;
 
--- configuration
-{
-    "techniques": {
-        "default": {
-            "constantLighting" : {
-                "source": [ 
-                    "Lighting.Constant"
-                ]
-            },
-            "defaultLighting" : {
-                "source": [ 
-                    "Lighting.Default"
-                ]
-            }
-        }
-    }
-}
+HdCommandDescriptor::HdCommandDescriptor() = default;
 
+PXR_NAMESPACE_CLOSE_SCOPE

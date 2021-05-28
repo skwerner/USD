@@ -1123,6 +1123,10 @@ public:
     ///
     /// Edits through the proxy changes the sublayers.  If this layer does
     /// not have any sublayers the proxy is empty.
+    ///
+    /// Sub-layer paths are asset paths, and thus must contain valid asset path
+    /// characters (UTF-8 without C0 and C1 controls).  See SdfAssetPath for
+    /// more details.
     SDF_API
     SdfSubLayerProxy GetSubLayerPaths() const;
 
@@ -1499,6 +1503,17 @@ private:
         Lock &lock,
         const _FindOrOpenLayerInfo& info,
         bool metadataOnly);
+
+    // Helper function for finding a layer with \p identifier and \p args.
+    // \p lock must be unlocked initially and will be locked by this
+    // function when needed. See docs for \p retryAsWriter argument on
+    // _TryToFindLayer for details on the final state of the lock when
+    // this function returns.
+    template <class ScopedLock>
+    static SdfLayerRefPtr
+    _Find(const std::string &identifier,
+          const FileFormatArguments &args,
+          ScopedLock &lock, bool retryAsWriter);
 
     // Helper function to try to find the layer with \p identifier and
     // pre-resolved path \p resolvedPath in the registry.  Caller must hold

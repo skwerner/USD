@@ -22,9 +22,9 @@ set(optionalPublicClasses "")
 set(optionalPrivateClasses "")
 if (${PXR_ENABLE_MATERIALX_SUPPORT})
     add_definitions(-DPXR_MATERIALX_STDLIB_DIR="${MATERIALX_STDLIB_DIR}")
-    add_definitions(-DPXR_MATERIALX_RESOURCE_DIR="${MATERIALX_RESOURCE_DIR}")
+    add_definitions(-DPXR_MATERIALX_BASE_DIR="${MATERIALX_BASE_DIR}")
 
-    list(APPEND optionalLibs ${MATERIALX_LIBRARIES})
+    list(APPEND optionalLibs ${MATERIALX_LIBRARIES} hdMtlx)
     list(APPEND optionalIncludeDirs ${MATERIALX_INCLUDE_DIRS})
     list(APPEND optionalPrivateClasses
          materialXFilter
@@ -92,7 +92,6 @@ pxr_library(hdSt
         material
         materialNetwork
         mesh
-        mixinShader
         package
         points
         primUtils
@@ -172,8 +171,6 @@ pxr_library(hdSt
         shaders/frustumCull.glslfx
         shaders/imageShader.glslfx
         shaders/instancing.glslfx
-        shaders/lighting.glslfx
-        shaders/lightingIntegrationShader.glslfx
         shaders/mesh.glslfx
         shaders/meshFaceCull.glslfx
         shaders/meshNormal.glslfx

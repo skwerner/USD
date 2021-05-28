@@ -1,7 +1,5 @@
--- glslfx version 0.1
-
 //
-// Copyright 2017 Pixar
+// Copyright 2021 Pixar
 //
 // Licensed under the Apache License, Version 2.0 (the "Apache License")
 // with the following modification; you may not use this file except in
@@ -23,43 +21,27 @@
 // KIND, either express or implied. See the Apache License for the specific
 // language governing permissions and limitations under the Apache License.
 //
+#ifndef EXT_RMANPKG_23_0_PLUGIN_RENDERMAN_PLUGIN_HD_PRMAN_MATFILT_MATERIALX_H
+#define EXT_RMANPKG_23_0_PLUGIN_RENDERMAN_PLUGIN_HD_PRMAN_MATFILT_MATERIALX_H
 
---- This is what an import might look like.
---- #import $TOOLS/hdSt/shaders/lighting.glslfx
+#include "pxr/pxr.h"
+#include "hdPrman/matfiltFilterChain.h"
 
---- --------------------------------------------------------------------------
--- glsl Lighting.Default
+PXR_NAMESPACE_OPEN_SCOPE
 
-#ifdef HD_HAS_integrateLights
+/// MatfiltFilterChain::FilterFnc implementation which supports
+/// MaterialX shading node graphs.
+/// 
+/// The terminal nodes are converted to PxrSurface, PxrDisplacement,
+/// and PxrVolume respectively, and any input graphs use MaterialX
+/// shader code-generation, are compiled, and replaced with a single
+/// node.
+void MatfiltMaterialX(const SdfPath & networkId,
+                      HdMaterialNetwork2 & network,
+                      const std::map<TfToken, VtValue> & contextValues,
+                      const NdrTokenVec & shaderTypePriority,
+                      std::vector<std::string> * outputErrorMessages);
 
-#ifndef HD_HAS_definedIntegrateLights
-#define HD_HAS_definedIntegrateLights
-
-LightingContribution
-integrateLights(vec4 Peye, vec3 Neye, LightingInterfaceProperties props)
-{
-    return integrateLightsDefault(Peye, Neye, props);
-}
-
-#endif // HD_HAS_definedIntegrateLights
-
-#endif
-
---- --------------------------------------------------------------------------
--- glsl Lighting.Constant
-
-#ifdef HD_HAS_integrateLights
-
-#ifndef HD_HAS_definedIntegrateLights
-#define HD_HAS_definedIntegrateLights
-
-LightingContribution
-integrateLights(vec4 Peye, vec3 Neye, LightingInterfaceProperties props)
-{
-    return integrateLightsConstant(Peye, Neye, props);
-}
-
-#endif // HD_HAS_definedIntegrateLights
+PXR_NAMESPACE_CLOSE_SCOPE
 
 #endif
-
